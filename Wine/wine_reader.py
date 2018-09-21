@@ -291,19 +291,55 @@ ax.set_xlabel('Score')
 plt.savefig('score_kde_whites.png')
 plt.show()
 
+mask_red = mask_cab | mask_pin | mask_syr | mask_zin | mask_mer
+mask_wht = mask_chd | mask_sav | mask_rsl
 
-grape = df.groupby(['variety'])['variety'].count().sort_values(ascending=True)
+#now lets looks at some simple linear regression models
+sns.lmplot(data=df[mask_cal & mask_red], x='points', y='price', \
+           hue = 'variety', \
+           x_estimator=np.mean,
+           legend = False,
+           fit_reg = True,
+           logx = False
+           )
+ax = plt.gca()
+ax.legend(loc='upper left')
+ax.set_ylabel('Price ($)')
+ax.set_xlabel('Score')
+plt.show()
 
-#plot CDF
-fig, ax = plt.subplots()
-ax.plot(np.arange(len(df[mask_cal & mask_cab]['points'])), \
-        np.cumsum(df[mask_cal & mask_cab]['points']) / \
-        np.sum(df[mask_cal & mask_cab]['points']), label = 'Cabernet \nSauvignon')
-ax.set_title('Cumulative Distribution Function of Grape Varietal')
-ax.set_ylabel('Cumulative sum (%)')
-ax.set_xlabel('Varietal ordered by frequency')
-ax.grid(alpha=0.3)
-fig.tight_layout()
+sns.residplot(data=df[mask_cal & mask_cab], x='points', y='price')
+sns.residplot(data=df[mask_cal & mask_mer], x='points', y='price')
+sns.residplot(data=df[mask_cal & mask_pin], x='points', y='price')
+sns.residplot(data=df[mask_cal & mask_zin], x='points', y='price')
+sns.residplot(data=df[mask_cal & mask_syr], x='points', y='price')
+ax = plt.gca()
+ax.legend(loc='upper left')
+ax.set_ylabel('Price Residual')
+ax.set_xlabel('Score')
+plt.show()
+
+
+sns.lmplot(data=df[mask_cal & mask_wht], x='points', y='price', \
+           hue = 'variety', \
+           x_estimator=np.mean,
+           legend = False,
+           fit_reg = True,
+           logx=False
+           )
+ax = plt.gca()
+ax.legend(loc='upper left')
+ax.set_ylabel('Price ($)')
+ax.set_xlabel('Score')
+plt.show()
+
+sns.residplot(data=df[mask_cal & mask_chd], x='points', y='price')
+sns.residplot(data=df[mask_cal & mask_sav], x='points', y='price')
+sns.residplot(data=df[mask_cal & mask_rsl], x='points', y='price')
+ax = plt.gca()
+ax.legend(loc='upper left')
+ax.set_ylabel('Price Residual')
+ax.set_xlabel('Score')
 plt.show()
 
 

@@ -9,7 +9,9 @@ Tue Sep 18 14:40:55 2018
 
 #setup
 import re
+import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
 
 def read_wine():
     path = '/Users/joshuamagee/Projects/Python/Jobs/Insight/'
@@ -20,6 +22,13 @@ def read_wine():
     
     return df
 
+def plot_coefs(X, coef, label):
+    coefs = pd.Series(coef, index = X.columns)
+    coefs.plot(kind = "barh")
+    plt.title(label)
+    plt.show()
+    return
+
 def clean_data(df):
    df = df[df['country'] == 'US'].copy()
    df.drop(columns=['country'], inplace=True)
@@ -29,26 +38,28 @@ def clean_data(df):
    df.dropna(subset=['variety', 'province', 'price', 'region_1', 'region_2'], \
              inplace=True)
    df.drop(columns=['taster_name'])
-   df = df[  (df['variety'] != 'Bordeaux-style Red Blend') \
-       & (df['variety'] != 'Red Blend' ) \
+   df['variety'] = df['variety'].str.lower()
+
+   df = df[  (df['variety'] != 'bordeaux-style red blend') \
+       & (df['variety'] != 'red blend' ) \
        ]
    df = df[df['province'] == 'California'].copy()
    df.drop(columns=['province'], inplace=True)
-   df = df[df['price'] < 150] #lets stick to regular wines       
+   df = df[df['price'] < 101] #lets stick to regular wines       
    
    return df
 
 def select_top10(df):
     #masks for various varietals
-    mask_cab = df['variety'] == 'Cabernet Sauvignon'
-    mask_pin = df['variety'] == 'Pinot Noir'
-    mask_syr = df['variety'] == 'Syrah'
-    mask_zin = df['variety'] == 'Zinfandel'
-    mask_mer = df['variety'] == 'Merlot'
+    mask_cab = df['variety'] == 'cabernet sauvignon'
+    mask_pin = df['variety'] == 'pinot noir'
+    mask_syr = df['variety'] == 'syrah'
+    mask_zin = df['variety'] == 'zinfandel'
+    mask_mer = df['variety'] == 'merlot'
     
-    mask_chd = df['variety'] == 'Chardonnay'
-    mask_sav = df['variety'] == 'Sauvignon Blanc'
-    mask_rsl = df['variety'] == 'Riesling'
+    mask_chd = df['variety'] == 'chardonnay'
+    mask_sav = df['variety'] == 'sauvignon blanc'
+    mask_rsl = df['variety'] == 'riesling'
     
     df = df[(mask_cab | mask_pin | mask_syr | mask_zin | mask_mer | \
              mask_chd | mask_sav | mask_rsl)
@@ -58,10 +69,19 @@ def select_top10(df):
 
 
 def coloring(grape):
-    if grape in['Sauvignon Blanc', 'Riesling', 'Chardonnay']:
+    if grape in['sauvignon blanc', 'riesling', 'chardonnay']:
         return 'white'
     else:
         return 'red'
+
+def extract_year(line):
+    for word in line.split():
+        if '½' in word:
+            word = word.replace('½','.5')
+        if word.isnumeric():
+            if (float(word) > 1980 and float(word) < 2020):
+                return word #year is categorical, not continuous
+    return 'generic'  #return generic
 
 def convert_score(val):
     if val >= 97.0:
