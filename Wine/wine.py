@@ -83,7 +83,7 @@ def extract_year(line):
                 return word #year is categorical, not continuous
     return 'generic'  #return generic
 
-def convert_score(val):
+def convert_score_to_category(val):
     if val >= 97.0:
         return 'A+'
     elif val >= 93.0:
@@ -98,6 +98,38 @@ def convert_score(val):
         return 'B-'
     else:
         return 'F'
+
+def convert_score_to_int_category(val):
+    if val >= 97.0:
+        return '1'
+    elif val >= 93.0:
+        return '2'
+    elif val >= 90.0:
+        return '3'
+    elif val >= 87.0:
+        return '4'
+    elif val >= 84.0:
+        return '5'
+    elif val >= 80.0:
+        return '6'
+    else:
+        return '7'
+
+def convert_int_to_score(val):
+    if val == 1:
+        return 97.0
+    elif val == 2:
+        return 90.0
+    elif val == 3:
+        return 90.0
+    elif val == 4:
+        return 87.0
+    elif val == 5:
+        return 84.0
+    elif val == 6:
+        return 80.0
+    else:
+        return 75
 
 
 def convert_region1(reg):

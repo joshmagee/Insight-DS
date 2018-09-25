@@ -19,8 +19,8 @@ sns.set_palette("dark")
 #from sklearn import linear_model
 from sklearn.metrics import mean_squared_error, r2_score
 from sklearn.preprocessing import StandardScaler
-from sklearn.model_selection import cross_val_score, train_test_split
-from sklearn.linear_model import LinearRegression, RidgeCV, LassoCV, ElasticNetCV
+from sklearn.model_selection import train_test_split
+
 #from sklearn.pipeline import Pipeline
 
 df = wine.read_wine()
@@ -38,86 +38,189 @@ df['region'] = df['region_1'].apply(wine.convert_region1)
 '''
 #drop taster_name, region_2, winery
 #drop designation, but can probably add that back later
+dg = df.copy()
 df.drop(columns=['taster_name', 'region_1', 'region_2', 'description', \
                  'designation', 'winery', 'title'], inplace=True)
 #add in color feature
 df['color'] = df['variety'].apply(wine.coloring)
 
-
 #let's just look at red wine
 df = df[df['color'] == 'red']
+#df = df[df['color'] == 'white']
 
+normalize_price = False
+linear_regression = True
+north_coast_pinot_only = False
+tree_regression = False
+tree_classifier = False
+
+if north_coast_pinot_only:
+    normalize_price = True 
+
+if linear_regression:
+    normalize_price = True
+
+if normalize_price:
+    scaler = StandardScaler()
+    df['price'] = scaler.fit_transform(df['price'].values.reshape(-1,1))
+    
 #start one hot encoding shit
-#dfcol = pd.get_dummies(df['color'])
-dfvar = pd.get_dummies(df['variety'])
-dfreg = pd.get_dummies(df['region'])
-#df = pd.concat([df,dfreg,dfcol,dfvar], axis=1)
-df = pd.concat([df,dfreg,dfvar], axis=1)
+if normalize_price or tree_regression:
+    dfvar = pd.get_dummies(df['variety'])
+    dfreg = pd.get_dummies(df['region'])
+    df = pd.concat([df,dfreg,dfvar], axis=1)
+    df.drop(columns=['variety', 'color', 'region'], inplace=True)
 
-df.drop(columns=['variety', 'color', 'region'], inplace=True)
-
-#normalize pricing data
-scaler = StandardScaler()
-df['price'] = scaler.fit_transform(df['price'].values.reshape(-1,1))
-
+#if we want the score to be categorical
+if tree_classifier:
+    df['points'] = df['points'].apply(wine.convert_score_to_int_category)
+    
 #test train split
-y = df['points']
+if linear_regression:
+    from scipy.stats import norm, chi2, chisquare, chisqprob
+    from sklearn.linear_model import LinearRegression #, RidgeCV, LassoCV, ElasticNetCV
+    y = df['points']
+    X_train, X_test, y_train, y_test = train_test_split( \
+        df.drop(columns=['points']), y, train_size=0.80, random_state=42)
+    X_train = df.drop(columns='points')
+    lr = LinearRegression()
+    lr.fit(X_train, y) # reshape to column vector
+    wine.plot_coefs(X_train, lr.coef_, "Coefficients in Simple Model")
+    #plt.savefig('simple_regression_coefs.png')
+    
+    y_pred = lr.predict(X_test)
+    
+    # The mean squared error
+    print("Mean squared error: ", \
+          mean_squared_error(y_test, y_pred))
+    # Explained variance score: 1 is perfect prediction
+    print('R2 score: ', \
+          r2_score(y_test, y_pred))
+    
+    y = y_test - y_pred
+    n, bins, _ = plt.hist(y, bins=50, range=[-10,10], normed=True)
+    mu, sigma = norm.fit(y)
+    fit = norm.pdf(bins[:-1], mu, sigma)
+    plt.plot(bins[:-1], fit, 'r--', linewidth=2)
+    plt.xlabel('Difference of Real Score and Predicted')
+    plt.ylabel('')
+    plt.grid(True, alpha=0.3)
+    plt.savefig('linear_regression_accuracy_reds.png')
+    plt.show()
+    
+    index_low = np.where(bins == -3)
+    index_up  = np.where(bins == 3)
+    
+    bin_width = bins[1]-bins[0]
+    integral = bin_width * sum(n[35:60])
+    tot_integral = bin_width * sum(n[:])
+    
+    #calculate chi2 and p-value
+    chisq, p = chisquare(n, f_exp=fit)
+    #now calculate usual test statistic
+    pval = 1 - chi2.cdf(chisq, len(bins[:-1]-2))
+    #alternate
+#    pval = chisqprob(chisq, len(bins[:-1]-2))
+    
+    print('Mean +- sigma: ' + str(mu) + ' ' + str(sigma))
+    print('Total area: ' + str(integral/tot_integral))
 
-X_train, X_test, y_train, y_test = train_test_split( \
-    df.drop(columns=['points']), y, train_size=0.80, random_state=42)
-
-X_train = df.drop(columns='points')
-lr = LinearRegression()
-lr.fit(X_train, y) # reshape to column vector
-wine.plot_coefs(X_train, lr.coef_, "Coefficients in Simple Model")
-
-y_pred = lr.predict(X_test)
-
-# The mean squared error
-print("Mean squared error: ", \
-      mean_squared_error(y_test, y_pred))
-# Explained variance score: 1 is perfect prediction
-print('R2 score: ', \
-      r2_score(y_test, y_pred))
-
-#print("RMSE on Training set :", rmse_cv_train(lr).mean())
 
 
 
+#now let's just look at one example
+#north coast pinot noir linear regression
+if north_coast_pinot_only:
+    X = df[(df['region']=='north coast') & (df['variety']=='pinot noir')]['price']
+    y = df[(df['region']=='north coast') & (df['variety']=='pinot noir')]['points']
+    lr = LinearRegression()
+    lr.fit(X.values.reshape(-1,1), y) # reshape to column vector
+    print('Intercept: ', lr.intercept_)
+    print('Slope: ', lr.coef_[0])
+    
+    y_pred = lr.predict(X.values.reshape(-1,1))
+    
+    plt.plot(X, y, 'o', label='training data')
+    plt.plot(X, y_pred, label='model prediction', \
+             color='r', linewidth=1.5, linestyle='--')
+    ax = plt.gca()
+    plt.title('California North Coast Pinot Noirs')
+    ax.set_xlabel('Price ($)')
+    ax.set_ylabel('Score')
+    ax.set_xlim(xmax=101)
+    ax.legend()
+    
+    dg = df[(df['region']=='north coast') & (df['variety']=='pinot noir')]
+    g = sns.jointplot('price', 'points', data=dg, kind="hex")
+    ax = plt.gca()
+    ax.set_xlabel('Price ($)')
+    ax.set_ylabel('Score')
+    plt.legend()
+    plt.savefig('pinot_northcoast_score_v_price.png')
+    plt.show()
+ 
+
+#random forest and ensemble methods
+if tree_regression:
+    from sklearn import model_selection, ensemble
+    from sklearn import tree
+    y = df['points']
+    X = df.drop(columns=['points'])
+    
+    cv = model_selection.ShuffleSplit(n_splits=20, test_size=0.2, random_state=42)
+    def compute_error(clf, X, y):
+        return - model_selection.cross_val_score( \
+                                                 clf, X, y, cv=cv, \
+                                                 scoring='neg_mean_squared_error'\
+                                                 ).mean()
+    
+    tree_reg = tree.DecisionTreeRegressor()
+    extra_reg = ensemble.ExtraTreesRegressor()
+    forest_reg = ensemble.RandomForestRegressor()
+    
+    model_performance = pd.DataFrame([
+        ("Mean Model", y.var()),
+        ("Decision Tree", compute_error(tree_reg, X, y)),
+        ("Random Forest", compute_error(forest_reg, X, y)),
+        ("Extra Random Forest", compute_error(extra_reg, X, y)),
+    ], columns=["Model", "MSE"])
+    plt.figure()
+    ax = model_performance.plot(x="Model", y="MSE", kind="Bar", legend=False)
+    plt.xticks(rotation=45)
+    ax.set_ylabel('Mean Squared Error (score)')
+    ax.set_xlabel('')
+    ax.grid(alpha=0.3)
+    plt.savefig('random_forrest_regressor.png')
+    plt.show()
+
+    #compute residuals?
+
+#now random forest classifier
+if tree_classifier:
+    from sklearn.ensemble import RandomForestClassifier
+    
+    y = df['points']
+    X_train, X_test, y_train, y_test = train_test_split( \
+        df.drop(columns=['points']), y, train_size=0.80, random_state=42)
+    X_train = df.drop(columns='points')
+    
+    clf = RandomForestClassifier(random_state=42)
+    clf.fit(X_train, y)
+    print(clf.score(X_test, y_test))
+    print(clf.feature_importances_)
+    
+    wine.plot_coefs(X_train, clf.feature_importances_, \
+                    'Feature Importances (Random Forest Classifier)')
+    plt.savefig('random_forest_feature_importance.png')
+    
+#could plot price and score for generic wines. Expect them to be somewhat correlated
+    
 
 
 
-# =============================================================================
-# #now let's just look at one example
-# #north coast pinot noir
-# X = df[(df['region']=='north coast') & (df['variety']=='pinot noir')]['price']
-# y = df[(df['region']=='north coast') & (df['variety']=='pinot noir')]['points']
-# lr = LinearRegression()
-# lr.fit(X.values.reshape(-1,1), y) # reshape to column vector
-# print('Intercept: ', lr.intercept_)
-# print('Slope: ', lr.coef_[0])
-# 
-# y_pred = lr.predict(X.values.reshape(-1,1))
-# 
-# plt.plot(X, y, 'o', label='training data')
-# plt.plot(X, y_pred, label='model prediction', \
-#          color='r', linewidth=1.5, linestyle='--')
-# ax = plt.gca()
-# plt.title('California North Coast Pinot Noirs')
-# ax.set_xlabel('Price ($)')
-# ax.set_ylabel('Score')
-# ax.set_xlim(xmax=101)
-# ax.legend()
-# plt.show()
-# 
-# dg = df[(df['region']=='north coast') & (df['variety']=='pinot noir')]
-# g = sns.jointplot('price', 'points', data=dg, kind="hex")
-# ax = plt.gca()
-# ax.set_xlabel('Price ($)')
-# ax.set_ylabel('Score')
-# plt.legend()
-# plt.show()
-# =============================================================================
+
+
+
 
 
 #significance tests for these coefficients
