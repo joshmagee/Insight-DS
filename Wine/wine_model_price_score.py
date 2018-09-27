@@ -77,7 +77,7 @@ if tree_classifier:
     
 #test train split
 if linear_regression:
-    from scipy.stats import norm, chi2, chisquare, chisqprob
+    from scipy.stats import norm, chi2, chisquare
     from sklearn.linear_model import LinearRegression #, RidgeCV, LassoCV, ElasticNetCV
     y = df['points']
     X_train, X_test, y_train, y_test = train_test_split( \
