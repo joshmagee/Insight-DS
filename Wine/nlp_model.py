@@ -8,6 +8,7 @@ Tue Sep 18 15:00:42 2018
 """
 
 import wine
+import dill
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt

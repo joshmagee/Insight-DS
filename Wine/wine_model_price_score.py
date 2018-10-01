@@ -9,6 +9,7 @@ Tue Sep 18 14:40:00 2018
 
 
 import wine
+import dill
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -39,13 +40,13 @@ df['region'] = df['region_1'].apply(wine.convert_region1)
 #drop taster_name, region_2, winery
 #drop designation, but can probably add that back later
 dg = df.copy()
-df.drop(columns=['taster_name', 'region_1', 'region_2', 'description', \
+df.drop(columns=['taster_name', 'region_1', 'region_2', \
                  'designation', 'winery', 'title'], inplace=True)
 #add in color feature
 df['color'] = df['variety'].apply(wine.coloring)
 
 #let's just look at red wine
-df = df[df['color'] == 'red']
+#df = df[df['color'] == 'red']
 #df = df[df['color'] == 'white']
 
 normalize_price = False
@@ -79,16 +80,28 @@ if tree_classifier:
 if linear_regression:
     from scipy.stats import norm, chi2, chisquare
     from sklearn.linear_model import LinearRegression #, RidgeCV, LassoCV, ElasticNetCV
+    with open('wine_dataframe.dill', 'wb') as file:
+        dill.dump(df, file)
+   
+    df.drop(columns=['description'], inplace=True)  
+
     y = df['points']
     X_train, X_test, y_train, y_test = train_test_split( \
         df.drop(columns=['points']), y, train_size=0.80, random_state=42)
     X_train = df.drop(columns='points')
     lr = LinearRegression()
     lr.fit(X_train, y) # reshape to column vector
-    wine.plot_coefs(X_train, lr.coef_, "Coefficients in Simple Model")
-    #plt.savefig('simple_regression_coefs.png')
+    wine.plot_coefs(X_train, np.fabs(lr.coef_), \
+                    'Coefficients in Simple Linear Regression Model')
+    plt.savefig('simple_regression_coefs.png')
     
     y_pred = lr.predict(X_test)
+    
+    with open('wine_lr_model.dill', 'wb') as model:
+        dill.dump(lr, model)
+
+    with open('wine_price_transform.dill', 'wb') as xform:
+        dill.dump(scaler, xform)
     
     # The mean squared error
     print("Mean squared error: ", \

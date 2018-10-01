@@ -18,9 +18,9 @@ df = pd.read_csv('/Users/joshuamagee/Projects/Python/Jobs/Insight/wine_institute
 
 #total California wine production has increased 60% over the last 15 years
 fig, ax = plt.subplots()
-ax.plot(df['Year'], df['Table'], label='Table')
-ax.plot(df['Year'], df['Dessert'], label='Dessert')
-ax.plot(df['Year'], df['Sparkling'],  label='Sparkling')
+#ax.plot(df['Year'], df['Table'], label='Table')
+#ax.plot(df['Year'], df['Dessert'], label='Dessert')
+#ax.plot(df['Year'], df['Sparkling'],  label='Sparkling')
 ax.plot(df['Year'], df['Total'],  label='Total')
 ax.set_title('California Wine Production')
 ax.set_ylabel('Cases (Millions)')
