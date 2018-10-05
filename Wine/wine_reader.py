@@ -295,7 +295,7 @@ mask_red = mask_cab | mask_pin | mask_syr | mask_zin | mask_mer
 mask_wht = mask_chd | mask_sav | mask_rsl
 
 #now lets looks at some simple linear regression models
-sns.lmplot(data=df[mask_cal & mask_red], x='points', y='price', \
+sns.lmplot(data=df[mask_cal & mask_wht], x='points', y='price', \
            hue = 'variety', \
            x_estimator=np.mean,
            legend = False,
@@ -306,6 +306,22 @@ ax = plt.gca()
 ax.legend(loc='upper left')
 ax.set_ylabel('Price ($)')
 ax.set_xlabel('Score')
+plt.savefig('linear_regression_price_v_score_whites.png')
+plt.show()
+
+sns.lmplot(data=df[mask_cal & mask_red], x='price', y='points', \
+           hue = 'variety', \
+           x_estimator=np.mean,
+           legend = False,
+           fit_reg = False,
+           logx = False
+           )
+ax = plt.gca()
+ax.legend(loc='upper left')
+ax.set_ylabel('Price ($)')
+ax.set_xlabel('Score')
+ax.set_ylim(ymin=80, ymax=100)
+plt.savefig('linear_regression_score_v_price_reds.png')
 plt.show()
 
 sns.residplot(data=df[mask_cal & mask_cab], x='points', y='price')
@@ -317,20 +333,26 @@ ax = plt.gca()
 ax.legend(loc='upper left')
 ax.set_ylabel('Price Residual')
 ax.set_xlabel('Score')
+plt.tight_layout()
+plt.savefig('linear_regression_score_v_price_reds.png')
 plt.show()
 
 
-sns.lmplot(data=df[mask_cal & mask_wht], x='points', y='price', \
+#sns.lmplot(data=df[mask_cal & mask_wht], x='points', y='price', \
+sns.lmplot(data=df[mask_cal & mask_wht], x='price', y='points', \
            hue = 'variety', \
            x_estimator=np.mean,
            legend = False,
-           fit_reg = True,
+           fit_reg = False,
            logx=False
            )
 ax = plt.gca()
 ax.legend(loc='upper left')
-ax.set_ylabel('Price ($)')
-ax.set_xlabel('Score')
+ax.set_xlabel('Price ($)')
+ax.set_ylabel('Score')
+ax.set_ylim(ymin=80, ymax=100)
+plt.tight_layout()
+plt.savefig('linear_regression_score_v_price_whites.png')
 plt.show()
 
 sns.residplot(data=df[mask_cal & mask_chd], x='points', y='price')
@@ -343,55 +365,100 @@ ax.set_xlabel('Score')
 plt.show()
 
 
+fig, ax = plt.subplots()
+sns.kdeplot(df[mask_cal & mask_pin]['price'], label = 'Pinot Noir')
+sns.kdeplot(df[mask_cal & mask_mer]['price'], label = 'Merlot')
+ax.legend(loc='best')
+ax.set_xlim(xmin=0, xmax=100)
+ax.set_ylabel('Frequency')
+ax.set_xlabel('US Price ($)')
+plt.savefig('price_kde_pinot_merlot.png')
+plt.show()
+
+fig, ax = plt.subplots()
+sns.kdeplot(df[mask_cal & mask_pin]['points'], label = 'Pinot Noir')
+sns.kdeplot(df[mask_cal & mask_mer]['points'], label = 'Merlot')
+ax.legend(loc='best')
+ax.set_xlim(xmin=80, xmax=100)
+ax.set_ylabel('Frequency')
+ax.set_xlabel('Score')
+plt.savefig('score_kde_pinot_merlot.png')
+plt.show()
 
 
-# =============================================================================
-# #lets look only at Pinot Noir varietal
-# dpinot = df[df['variety'] == 'Pinot Noir']
-# dpinot.count().sort_values(ascending=False)
-# dpinot.describe()
-# dpinot.describe(percentiles=[x/10. for x in range(0,10)])
-# '''
-# Only two numerical features: rating points and price
-# There are 13272 unique wines, but only 9036 (68%) with all attributes.
-# 
-# Average points: 89.4 +- 3.12 (min=80, max=99)
-# Median points = 90.0
-# 
-# Average price: 47.5 +- 47.609 (min = 5, max = 2500)
-# Median price = 42, 95% percentile price = 90.0
-# Average discounting >95%: 41.78 +- 18.0
-# 
-# '''
-# 
-# dpinot.describe(include='O') #ordinal features
-# '''
-# There are 256 unique main regions, and 17 sub-regions. Region 2 is only
-# available for 68% of all wines.
-# 
-# To do:
-#     1) Is region 1 too large/small to be useful? Can we condense into one
-#         region label?
-#     2) Designation label seems mostly useless. Does ID some reserve bottles,
-#         but most are labelling the vineyard.
-#     3) Designation may be sueful to identify specific vineyard
-#     4) Province includes lots of other places. Would be nice to plot frequency
-#         of places.
-#     5) Do longer (ie, more pretenious?) titles correlate with higher prices or
-#         lower quality wines?
-#     6) taster_name might correlate with various scores or descriptors. Possibly
-#         need to regress that out or fix that.
-# '''
-# 
-# 
-# 
-# x = dpinot['price']
-# x = x.dropna()
-# fig = plt.figure
-# ax = plt.gca()
-# n, bins, patches = ax.hist(x=x,bins=np.logspace(0,3,50))
-# plt.show()
-# 
-# =============================================================================
+
+# Initialize the FacetGrid object
+#pal = sns.cubehelix_palette(10, rot=-.25, light=.7)
+#g = sns.FacetGrid(df[mask_cal & mask_red], row='variety', \
+#                  hue='variety', aspect=15, height=.5, palette=pal)
+#
+## Draw the densities in a few steps
+#g.map(sns.kdeplot, "x", clip_on=False, shade=True, alpha=1, lw=1.5, bw=.2)
+#g.map(sns.kdeplot, "x", clip_on=False, color="w", lw=2, bw=.2)
+#g.map(plt.axhline, y=0, lw=2, clip_on=False)
+#
+#
+## Define and use a simple function to label the plot in axes coordinates
+#def label(x, color, label):
+#    ax = plt.gca()
+#    ax.text(0, .2, label, fontweight="bold", color=color,
+#            ha="left", va="center", transform=ax.transAxes)
+#
+#
+#g.map(label, "x")
+#
+## Set the subplots to overlap
+#g.fig.subplots_adjust(hspace=-.25)
+
+
+
+
+
+#lets look only at Pinot Noir varietal
+dpinot = df[df['variety'] == 'Pinot Noir']
+dpinot.count().sort_values(ascending=False)
+dpinot.describe()
+dpinot.describe(percentiles=[x/10. for x in range(0,10)])
+'''
+Only two numerical features: rating points and price
+There are 13272 unique wines, but only 9036 (68%) with all attributes.
+
+Average points: 89.4 +- 3.12 (min=80, max=99)
+Median points = 90.0
+
+Average price: 47.5 +- 47.609 (min = 5, max = 2500)
+Median price = 42, 95% percentile price = 90.0
+Average discounting >95%: 41.78 +- 18.0
+
+'''
+
+dpinot.describe(include='O') #ordinal features
+'''
+There are 256 unique main regions, and 17 sub-regions. Region 2 is only
+available for 68% of all wines.
+
+To do:
+    1) Is region 1 too large/small to be useful? Can we condense into one
+        region label?
+    2) Designation label seems mostly useless. Does ID some reserve bottles,
+        but most are labelling the vineyard.
+    3) Designation may be sueful to identify specific vineyard
+    4) Province includes lots of other places. Would be nice to plot frequency
+        of places.
+    5) Do longer (ie, more pretenious?) titles correlate with higher prices or
+        lower quality wines?
+    6) taster_name might correlate with various scores or descriptors. Possibly
+        need to regress that out or fix that.
+'''
+
+
+
+x = dpinot['price']
+x = x.dropna()
+fig = plt.figure
+ax = plt.gca()
+n, bins, patches = ax.hist(x=x,bins=np.logspace(0,3,50))
+plt.show()
+
 
 

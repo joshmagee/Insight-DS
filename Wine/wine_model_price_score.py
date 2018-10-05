@@ -115,17 +115,18 @@ if linear_regression:
     mu, sigma = norm.fit(y)
     fit = norm.pdf(bins[:-1], mu, sigma)
     plt.plot(bins[:-1], fit, 'r--', linewidth=2)
-    plt.xlabel('Difference of Real Score and Predicted')
+    plt.xlabel('Difference of Real Score from Predicted')
     plt.ylabel('')
     plt.grid(True, alpha=0.3)
     plt.savefig('linear_regression_accuracy_reds.png')
+    plt.tight_layout()
     plt.show()
     
     index_low = np.where(bins == -3)
     index_up  = np.where(bins == 3)
     
     bin_width = bins[1]-bins[0]
-    integral = bin_width * sum(n[35:60])
+    integral = bin_width * sum(n[20:35])
     tot_integral = bin_width * sum(n[:])
     
     #calculate chi2 and p-value
