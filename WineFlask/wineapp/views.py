@@ -59,6 +59,12 @@ def get_most_important_features(vectorizer, model, n=5):
             'bottom':bottom
         }
     return classes
+
+def make_html_list(elements):
+    string = '<ol>\n'
+    string += '\n'.join(['<li>' + str(s) + '</li>' for s in elements])
+    string += '\n</ol>'
+    return string
 ###############################################################################
 
 
@@ -68,6 +74,11 @@ def get_most_important_features(vectorizer, model, n=5):
 def index():
     return render_template('index.html')
 
+
+@app.route('/output_empty')
+def output_empty():
+    return render_template('output_empty.html')
+
 @app.route('/output')
 def text_output():
     # pull input text and city from input field and store i
@@ -76,8 +87,9 @@ def text_output():
         input_variety = request.args.get('input_varietal')
         input_region  = request.args.get('input_region')
     
-    print('THE TYPE OF PRICE IS ')
-    print(type(price))
+    if (input_region == 'far north' and input_variety == 'riesling'):
+        return render_template('output_empty.html')
+    
     #get dataframe
     with open('wine_dataframe.dill', 'rb') as file:
         df = dill.load(file)
@@ -87,6 +99,9 @@ def text_output():
         
     with open('wine_lr_model.dill','rb') as model:
         lr= dill.load(model)
+
+    with open('wine_nlp_dataframe.dill', 'rb') as file:
+        dn = dill.load(file)
 
     price_scaled =  scaler_xform.transform([[float(price)]])
     df_pred = df.head(1)
@@ -121,31 +136,21 @@ def text_output():
     ninth = int(round(ninth[0][0]))
     
     #now for the NLP tasting characteristics portion
-    df_desc = prep_df_for_tfidf(df, input_variety, input_region)
-    df_desc = standardize_text(df_desc, 'description')
-    
-    X = df_desc['description'].tolist()
-    y = df_desc['region'].tolist()
-    
-    tfidf_vectorizer = TfidfVectorizer()
-    X_idf = tfidf_vectorizer.fit_transform(X)
-    
-    clf_tfidf = LogisticRegression(C=30.0, class_weight='balanced', \
-                            solver='newton-cg',multi_class='multinomial', \
-                            n_jobs=-1, random_state=40)
-    clf_tfidf.fit(X_idf, y)
-    
-    importance_tfidf = get_most_important_features(tfidf_vectorizer, clf_tfidf, 10)
-    top_words = [a[1] for a in importance_tfidf[0]['tops']]
-    top10 = ', '.join(top_words[::-1])
+    mask = (dn['variety'] == input_variety) & (dn['region'] == input_region)
+    mytop10 = dn[mask]['array'][0]
+    length  = dn[mask]['total'][0]
+    top10 = make_html_list(mytop10)
         
     try:
-        return render_template("output.html", \
-                               varietal = input_variety, \
-                               region = input_region, \
+        return render_template("output.html",
+                               varietal = input_variety,
+                               region = input_region,
+                               reviews = length,
                                score = score,
-                               price=halve, pricetenth=tenth, \
-                               priceninetieth=ninth, \
+                               price=float(price),
+                               medianprice=halve, 
+                               pricetenth=tenth,
+                               priceninetieth=ninth,
                                tastingnotes=top10)
     except:
         return render_template('error.html')

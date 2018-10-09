@@ -32,23 +32,40 @@
 
       <main role="main" class="inner cover">
         <h1 class="cover-heading">WineFlask</h1>
-        <p class="lead">Information on {{varietal}}s from {{region}}.</p>
+        <h2 class="lead">Information on {{varietal}}s from {{region}}.</h2>
 		
 		<div class="container">
 		  <div class="row">
-		    <div class="col-sm">
-		      Predicted score: {{score}}.
+		    <div class="col">
+				<br>
+			  A ${{price}} bottle has a predicted score is: <br>
+		      <h2>{{score}}</h2>
 		    </div>
-		    <div class="col-sm">
-			  10th percentile: ${{pricetenth}}.
+		  </div>
+		  <div class="row">
+  		    <div class="col">
 			  <br>
-			  Median price: ${{price}}.
+			  The price point of similar bottles is: <br>
+		  </div>
+		  	<div class="col">
+				<br>
+  			  10th percentile: ${{pricetenth}}.
+  			  <br>
+  			  Median price: ${{medianprice}}.
+  			  <br>
+  			  90th percentile: ${{priceninetieth}}.
 			  <br>
-			  90th percentile:${{priceninetieth}}.
-		    </div>
-		    <div class="col-sm">
-		      Common tasting characteristics are: {{tastingnotes}}.
-		    </div>
+  		    </div>
+		  </div>
+		  <div class="row">
+    		   <div class="col">
+				   <br>
+    		     Common tasting characteristics of these bottles include: <br>
+			   </div>
+			   <div class="col">
+				   <br>
+    			  {{tastingnotes | safe}}
+    		   </div>
 		  </div>
 		</div>
       </main>
