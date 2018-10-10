@@ -13,6 +13,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+from nltk.corpus import stopwords
 
 sns.set_palette("dark")
 
@@ -40,6 +41,19 @@ def standardize_text(df, text_field):
     df[text_field] = df[text_field].str.replace(r"  ", " ")
     df[text_field] = df[text_field].str.replace(r"@", "at")
     df[text_field] = df[text_field].str.lower()
+    
+    stop = stopwords.words('english')
+    domain = ['carneros', 'sonoma', 'annapolis', 'paso', 'livermore', 'napa',
+              'robles', 'stags', 'soon', 'lot', 'santa', 'central', 'coast',
+              'calera', 'ross', 'county', 'rita', 'fort', 'marin', 'got',
+              'town', '60', '17', 'wine', 'flavors', 'cabernet', 'pinot',
+              'noir', 'zin', 'syrah', 'chardonnay', 'riesling', 'blanc', 
+              'sauvignon']
+    stop.extend(domain)
+    
+    df[text_field] = \
+        df[text_field].apply(lambda x: \
+          ' '.join([item for item in x.split() if item not in stop]))
     return df
 
 df = standardize_text(df, 'description')
@@ -160,19 +174,20 @@ def plot_important_words(top_scores, top_words, bottom_scores, bottom_words, nam
 
     plt.subplot(121)
     plt.barh(y_pos,bottom_scores, align='center', alpha=0.5)
-    plt.title('White', fontsize=20)
-    plt.yticks(y_pos, bottom_words, fontsize=14)
-    plt.suptitle('Key words', fontsize=16)
-    plt.xlabel('Importance', fontsize=20)
+    plt.title('White', fontsize=24)
+    plt.yticks(y_pos, bottom_words, fontsize=24)
+    plt.suptitle('Key words', fontsize=20)
+    plt.xlabel('Importance', fontsize=24)
     
     plt.subplot(122)
     plt.barh(y_pos,top_scores, align='center', alpha=0.5)
-    plt.title('Red', fontsize=20)
-    plt.yticks(y_pos, top_words, fontsize=14)
-    plt.suptitle(name, fontsize=16)
-    plt.xlabel('Importance', fontsize=20)
+    plt.title('Red', fontsize=24)
+    plt.yticks(y_pos, top_words, fontsize=24)
+    plt.suptitle(name, fontsize=20)
+    plt.xlabel('Importance', fontsize=24)
     
     plt.subplots_adjust(wspace=0.8)
+    plt.tight_layout()
     plt.show()
 
 from sklearn.linear_model import LogisticRegression
@@ -213,8 +228,8 @@ top_words = [a[1] for a in importance_tfidf[0]['tops']]
 bottom_scores = [a[0] for a in importance_tfidf[0]['bottom']]
 bottom_words = [a[1] for a in importance_tfidf[0]['bottom']]
 
-plot_important_words(top_scores, top_words, bottom_scores, bottom_words, \
-                     "Most important words for relevance")
+plot_important_words(top_scores, top_words, bottom_scores, bottom_words,'')#, 
+                     #"Most relevant words")
 plt.savefig('white_v_red_top10_words.png')
 
 import itertools

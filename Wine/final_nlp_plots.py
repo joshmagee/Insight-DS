@@ -111,14 +111,14 @@ def plot_important_words(top_scores, top_words, bottom_scores, bottom_words, nam
     plt.subplot(121)
     plt.barh(y_pos,bottom_scores, align='center', alpha=0.5)
     plt.title('Napa', fontsize=20)
-    plt.yticks(y_pos, bottom_words, fontsize=14)
+    plt.yticks(y_pos, bottom_words, fontsize=20)
     plt.suptitle('Key words', fontsize=16)
     plt.xlabel('Importance', fontsize=20)
     
     plt.subplot(122)
     plt.barh(y_pos,top_scores, align='center', alpha=0.5)
     plt.title('Other', fontsize=20)
-    plt.yticks(y_pos, top_words, fontsize=14)
+    plt.yticks(y_pos, top_words, fontsize=20)
     plt.suptitle(name, fontsize=16)
     plt.xlabel('Importance', fontsize=20)
     
@@ -231,100 +231,96 @@ with open('wine_nlp_dataframe.dill', 'wb') as file:
 
 
 
-#input_variety = 'cabernet sauvignon'
-# =============================================================================
-# input_variety = 'pinot noir'
-# region1  = 'north coast'
-# region2  = 'central coast'
-# region2  = 'generic'
-#     
-# df = standardize_text(df, 'description')
-# #df = prep_df_for_tfidf(df, input_variety, region1)
-# #df = prep_df_for_tfidf2(df, input_variety, region1, region2)
-# df = df.dropna()
-# 
-# list_corpus = df["description"].tolist()
-# list_labels = df["region"].tolist()
-# 
-# #investigate relative weights of features in word doc
-# from sklearn.feature_extraction.text import CountVectorizer
-# 
-# dg = df[df['region'] == 1]
-# dg = dg.drop(columns=['region'])
-# cv = CountVectorizer()
-# cv_fit = cv.fit_transform(dg['description'])
-# 
-# cv_fit_flat = cv_fit.toarray().sum(axis=0)
-# cv_fit_flat_norm = cv_fit_flat/np.sum(cv_fit_flat)
-# features = cv.get_feature_names()
-# 
-# #now need to zip features with feature frequency
-# cv_sorted = sorted(list(zip(features, cv_fit_flat_norm)), \
-#                    key=lambda x: x[1], reverse=True)
-# 
-# cv_cdf = [x[1] for x in cv_sorted]
-# fig, ax = plt.subplots()
-# ax.plot(np.arange(len(cv_cdf)), np.cumsum(cv_cdf)/np.sum(cv_cdf), 'r')
-# ax.set_title('Cumulative Distribution Function of Word Frequency')
-# ax.set_ylabel('Cumulative sum (%)')
-# ax.set_xlabel('Word features ordered by frequency')
-# ax.set_xlim(xmin=0, xmax=100)
-# ax.grid(alpha=0.3)
-# fig.tight_layout()
-# plt.savefig('word_cdf.png')
-# plt.show()
-# 
-# =============================================================================
+input_variety = 'cabernet sauvignon'
+#input_variety = 'pinot noir'
+region1  = 'north coast'
+region2  = 'central coast'
+#region2  = 'generic'
+    
+df = standardize_text(df, 'description')
+df = prep_df_for_tfidf(df, input_variety, region1)
+#df = prep_df_for_tfidf2(df, input_variety, region1, region2)
+df = df.dropna()
+
+list_corpus = df["description"].tolist()
+list_labels = df["region"].tolist()
+
+#investigate relative weights of features in word doc
+from sklearn.feature_extraction.text import CountVectorizer
+
+dg = df[df['region'] == 1]
+dg = dg.drop(columns=['region'])
+cv = CountVectorizer()
+cv_fit = cv.fit_transform(dg['description'])
+
+cv_fit_flat = cv_fit.toarray().sum(axis=0)
+cv_fit_flat_norm = cv_fit_flat/np.sum(cv_fit_flat)
+features = cv.get_feature_names()
+
+#now need to zip features with feature frequency
+cv_sorted = sorted(list(zip(features, cv_fit_flat_norm)), \
+                   key=lambda x: x[1], reverse=True)
+
+cv_cdf = [x[1] for x in cv_sorted]
+fig, ax = plt.subplots()
+ax.plot(np.arange(len(cv_cdf)), np.cumsum(cv_cdf)/np.sum(cv_cdf), 'r')
+ax.set_title('Cumulative Distribution Function of Word Frequency')
+ax.set_ylabel('Cumulative sum (%)')
+ax.set_xlabel('Word features ordered by frequency')
+ax.set_xlim(xmin=0, xmax=100)
+ax.grid(alpha=0.3)
+fig.tight_layout()
+plt.savefig('word_cdf.png')
+plt.show()
 
 
-# =============================================================================
-# 
-# def tfidf(data):
-#     tfidf_vectorizer = TfidfVectorizer()
-#     train = tfidf_vectorizer.fit_transform(data)
-#     return train, tfidf_vectorizer
-# 
-# 
-# X_train, X_test, y_train, y_test = \
-#     train_test_split(list_corpus, list_labels, \
-#                      test_size=0.2, random_state=42,stratify=list_labels)
-# 
-# X_train_tfidf, tfidf_vectorizer = tfidf(X_train)
-# X_test_tfidf = tfidf_vectorizer.transform(X_test)
-# 
-# clf_tfidf = LogisticRegression(C=30.0, class_weight='balanced', solver='newton-cg', 
-#                          multi_class='multinomial', n_jobs=-1, random_state=40)
-# clf_tfidf.fit(X_train_tfidf, y_train)
-# 
-# y_predicted_tfidf = clf_tfidf.predict(X_test_tfidf)
-# 
-# accuracy_tfidf, precision_tfidf, recall_tfidf, f1_tfidf = get_metrics(y_test, y_predicted_tfidf)
-# print("accuracy = %.3f, precision = %.3f, recall = %.3f, f1 = %.3f" % (accuracy_tfidf, precision_tfidf, 
-#                                                                        recall_tfidf, f1_tfidf))
-# 
-# 
-# 
-# importance_tfidf = get_most_important_features(tfidf_vectorizer, clf_tfidf, 10)
-# top_scores = [a[0] for a in importance_tfidf[0]['tops']]
-# top_words = [a[1] for a in importance_tfidf[0]['tops']]
-# bottom_scores = [a[0] for a in importance_tfidf[0]['bottom']]
-# bottom_words = [a[1] for a in importance_tfidf[0]['bottom']]
-# 
-# plot_important_words(top_scores, top_words, bottom_scores, bottom_words, \
-#                      "Most important words for relevance")
-# plt.savefig('napa_v_notnapa_pint_top10_words.png')
-# 
-# cm2 = confusion_matrix(y_test, y_predicted_tfidf)
-# fig = plt.figure(figsize=(10, 10))
-# plot = plot_confusion_matrix(cm2, classes=['Napa','Other'], \
-#                              normalize=False, title='Confusion matrix')
-# plt.show()
-# plt.savefig('napa_v_notnapa_pinot_confusion_matrix.png')
-# print("TFIDF confusion matrix")
-# print(cm2)
-# print("BoW confusion matrix")
-# 
-# =============================================================================
+
+
+def tfidf(data):
+    tfidf_vectorizer = TfidfVectorizer()
+    train = tfidf_vectorizer.fit_transform(data)
+    return train, tfidf_vectorizer
+
+
+X_train, X_test, y_train, y_test = \
+    train_test_split(list_corpus, list_labels, \
+                     test_size=0.2, random_state=42,stratify=list_labels)
+
+X_train_tfidf, tfidf_vectorizer = tfidf(X_train)
+X_test_tfidf = tfidf_vectorizer.transform(X_test)
+
+clf_tfidf = LogisticRegression(C=30.0, class_weight='balanced', solver='newton-cg', 
+                         multi_class='multinomial', n_jobs=-1, random_state=40)
+clf_tfidf.fit(X_train_tfidf, y_train)
+
+y_predicted_tfidf = clf_tfidf.predict(X_test_tfidf)
+
+accuracy_tfidf, precision_tfidf, recall_tfidf, f1_tfidf = get_metrics(y_test, y_predicted_tfidf)
+print("accuracy = %.3f, precision = %.3f, recall = %.3f, f1 = %.3f" % (accuracy_tfidf, precision_tfidf, 
+                                                                       recall_tfidf, f1_tfidf))
+
+
+
+importance_tfidf = get_most_important_features(tfidf_vectorizer, clf_tfidf, 10)
+top_scores = [a[0] for a in importance_tfidf[0]['tops']]
+top_words = [a[1] for a in importance_tfidf[0]['tops']]
+bottom_scores = [a[0] for a in importance_tfidf[0]['bottom']]
+bottom_words = [a[1] for a in importance_tfidf[0]['bottom']]
+
+plot_important_words(top_scores, top_words, bottom_scores, bottom_words, \
+                     "Most important words for relevance")
+plt.savefig('napa_v_notnapa_cab_top10_words.png')
+
+cm2 = confusion_matrix(y_test, y_predicted_tfidf)
+fig = plt.figure(figsize=(10, 10))
+plot = plot_confusion_matrix(cm2, classes=['Napa','Other'], \
+                             normalize=False, title='Confusion matrix')
+plt.show()
+plt.savefig('napa_v_notnapa_cab_confusion_matrix.png')
+print("TFIDF confusion matrix")
+print(cm2)
+print("BoW confusion matrix")
+
 
 
 

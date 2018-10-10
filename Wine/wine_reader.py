@@ -165,6 +165,7 @@ plt.show()
 
 #let's just look at California wines first
 mask_cal = df['province'] == 'California'
+df = df[df['price'] < 150]
 #masks for various varietals
 mask_cab = df['variety'] == 'Cabernet Sauvignon'
 mask_pin = df['variety'] == 'Pinot Noir'
@@ -183,24 +184,28 @@ whites = ['Chardonnay', 'Sauvignon Blanc', 'Riesling']
 fig, ax = plt.subplots()
 sns.boxplot(data=df[mask_cal], x='variety', y='price', \
                order=reds)
+ax.tick_params(labelsize='large')
 plt.savefig('price_box_reds.png')
 plt.show()
 
 fig, ax = plt.subplots()
 sns.boxplot(data=df[mask_cal], x='variety', y='price', \
                order=whites)
+ax.tick_params(labelsize='large')
 plt.savefig('price_box_whites.png')
 plt.show()
 
 fig, ax = plt.subplots()
 sns.boxplot(data=df[mask_cal], x='variety', y='points', \
                order=reds)
+ax.tick_params(labelsize='large')
 plt.savefig('score_box_reds.png')
 plt.show()
 
 fig, ax = plt.subplots()
 sns.boxplot(data=df[mask_cal], x='variety', y='points', \
                order=whites)
+ax.tick_params(labelsize='large')
 plt.savefig('score_box_whites.png')
 plt.show()
 
@@ -220,24 +225,28 @@ mask_rsl = df['variety'] == 'Riesling'
 fig, ax = plt.subplots()
 sns.violinplot(data=df[mask_cal], x='variety', y='points', \
                order=reds, fliersize=20)
+ax.tick_params(labelsize='large')
 plt.savefig('points_violin_reds.png')
 plt.show()
 
 fig, ax = plt.subplots()
 sns.violinplot(data=df[mask_cal], x='variety', y='points', \
                order=whites, fliersize=20)
+ax.tick_params(labelsize='large')
 plt.savefig('points_violin_whites.png')
 plt.show()
 
 fig, ax = plt.subplots()
 sns.violinplot(data=df[mask_cal], x='variety', y='price', \
                order=reds, fliersize=20)
+ax.tick_params(labelsize='large')
 plt.savefig('price_violin_reds.png')
 plt.show()
 
 fig, ax = plt.subplots()
 sns.violinplot(data=df[mask_cal], x='variety', y='price', \
                order=whites, fliersize=20)
+ax.tick_params(labelsize='large')
 plt.savefig('price_violin_whites.png')
 plt.show()
 
@@ -247,10 +256,12 @@ sns.kdeplot(df[mask_cal & mask_pin]['price'], label = 'Pinot Noir')
 sns.kdeplot(df[mask_cal & mask_syr]['price'], label = 'Syrah')
 sns.kdeplot(df[mask_cal & mask_zin]['price'], label = 'Zinfandel')
 sns.kdeplot(df[mask_cal & mask_mer]['price'], label = 'Merlot')
-ax.legend(loc='best')
+ax.legend(loc='best', fontsize=15)
+ax.tick_params(labelsize='large')
 ax.set_xlim(xmin=0, xmax=100)
-ax.set_ylabel('Frequency')
-ax.set_xlabel('US Price ($)')
+ax.set_ylabel('Frequency', fontsize=20)
+ax.set_xlabel('US Price ($)', fontsize=20)
+plt.tight_layout()
 plt.savefig('price_kde_reds.png')
 plt.show()
 
@@ -258,10 +269,12 @@ fig, ax = plt.subplots()
 sns.kdeplot(df[mask_cal & mask_chd]['price'], label = 'Chardonnay')
 sns.kdeplot(df[mask_cal & mask_sav]['price'], label = 'Sauvignon Blanc')
 sns.kdeplot(df[mask_cal & mask_rsl]['price'], label = 'Riesling')
-ax.legend(loc='best')
+ax.legend(loc='best', fontsize=15)
+ax.tick_params(labelsize='large')
 ax.set_xlim(xmin=0, xmax=100)
-ax.set_ylabel('Frequency')
-ax.set_xlabel('US Price ($)')
+ax.set_ylabel('Frequency', fontsize=20)
+ax.set_xlabel('US Price ($)', fontsize=20)
+plt.tight_layout()
 plt.savefig('price_kde_whites.png')
 plt.show()
 
@@ -273,10 +286,12 @@ sns.kdeplot(df[mask_cal & mask_pin]['points'], label = 'Pinot Noir')
 sns.kdeplot(df[mask_cal & mask_syr]['points'], label = 'Syrah')
 sns.kdeplot(df[mask_cal & mask_zin]['points'], label = 'Zinfandel')
 sns.kdeplot(df[mask_cal & mask_mer]['points'], label = 'Merlot')
-ax.legend(loc='best')
+ax.legend(loc='best', fontsize=15)
+ax.tick_params(labelsize='large')
 ax.set_xlim(xmin=80, xmax=100)
-ax.set_ylabel('Frequency')
-ax.set_xlabel('Score')
+ax.set_ylabel('Frequency', fontsize=20)
+ax.set_xlabel('Score', fontsize=20)
+plt.tight_layout()
 plt.savefig('score_kde_reds.png')
 plt.show()
 
@@ -284,10 +299,12 @@ fig, ax = plt.subplots()
 sns.kdeplot(df[mask_cal & mask_chd]['points'], label = 'Chardonnay')
 sns.kdeplot(df[mask_cal & mask_sav]['points'], label = 'Sauvignon \nBlanc')
 sns.kdeplot(df[mask_cal & mask_rsl]['points'], label = 'Riesling')
-ax.legend(loc='best')
+ax.legend(loc='best', fontsize=15)
+ax.tick_params(labelsize='large')
 ax.set_xlim(xmin=80, xmax=100)
-ax.set_ylabel('Frequency')
-ax.set_xlabel('Score')
+ax.set_ylabel('Frequency', fontsize=20)
+ax.set_xlabel('Score', fontsize=20)
+plt.tight_layout()
 plt.savefig('score_kde_whites.png')
 plt.show()
 
@@ -295,93 +312,97 @@ mask_red = mask_cab | mask_pin | mask_syr | mask_zin | mask_mer
 mask_wht = mask_chd | mask_sav | mask_rsl
 
 #now lets looks at some simple linear regression models
-sns.lmplot(data=df[mask_cal & mask_wht], x='points', y='price', \
-           hue = 'variety', \
-           x_estimator=np.mean,
-           legend = False,
-           fit_reg = True,
-           logx = False
-           )
-ax = plt.gca()
-ax.legend(loc='upper left')
-ax.set_ylabel('Price ($)')
-ax.set_xlabel('Score')
-plt.savefig('linear_regression_price_v_score_whites.png')
-plt.show()
+#sns.lmplot(data=df[mask_cal & mask_wht], x='points', y='price', \
+#           hue = 'variety', \
+#           x_estimator=np.mean,
+#           legend = False,
+#           fit_reg = True,
+#           logx = False
+#           )
+#ax = plt.gca()
+#ax.legend(loc='upper left')
+#ax.set_ylabel('Price ($)')
+#ax.set_xlabel('Score')
+#plt.savefig('linear_regression_price_v_score_whites.png')
+#plt.show()
 
-sns.lmplot(data=df[mask_cal & mask_red], x='price', y='points', \
-           hue = 'variety', \
-           x_estimator=np.mean,
-           legend = False,
-           fit_reg = False,
-           logx = False
-           )
-ax = plt.gca()
-ax.legend(loc='upper left')
-ax.set_ylabel('Price ($)')
-ax.set_xlabel('Score')
-ax.set_ylim(ymin=80, ymax=100)
-plt.savefig('linear_regression_score_v_price_reds.png')
-plt.show()
+#sns.lmplot(data=df[mask_cal & mask_red], x='price', y='points', \
+#           hue = 'variety', \
+#           x_estimator=np.mean,
+#           legend = False,
+#           fit_reg = False,
+#           logx = False
+#           )
+#ax = plt.gca()
+#ax.legend(loc='upper left')
+#ax.set_ylabel('Price ($)')
+#ax.set_xlabel('Score')
+#ax.set_ylim(ymin=80, ymax=100)
+#plt.savefig('linear_regression_score_v_price_reds.png')
+#plt.show()
 
-sns.residplot(data=df[mask_cal & mask_cab], x='points', y='price')
-sns.residplot(data=df[mask_cal & mask_mer], x='points', y='price')
-sns.residplot(data=df[mask_cal & mask_pin], x='points', y='price')
-sns.residplot(data=df[mask_cal & mask_zin], x='points', y='price')
-sns.residplot(data=df[mask_cal & mask_syr], x='points', y='price')
-ax = plt.gca()
-ax.legend(loc='upper left')
-ax.set_ylabel('Price Residual')
-ax.set_xlabel('Score')
-plt.tight_layout()
-plt.savefig('linear_regression_score_v_price_reds.png')
-plt.show()
+#sns.residplot(data=df[mask_cal & mask_cab], x='points', y='price')
+#sns.residplot(data=df[mask_cal & mask_mer], x='points', y='price')
+#sns.residplot(data=df[mask_cal & mask_pin], x='points', y='price')
+#sns.residplot(data=df[mask_cal & mask_zin], x='points', y='price')
+#sns.residplot(data=df[mask_cal & mask_syr], x='points', y='price')
+#ax = plt.gca()
+#ax.legend(loc='upper left', fontsize=15)
+#ax.set_ylabel('Price Residual', fontsize=20)
+#ax.set_xlabel('Score', fontsize=20)
+#plt.tight_layout()
+#plt.savefig('linear_regression_score_v_price_reds.png')
+#plt.show()
 
 
 #sns.lmplot(data=df[mask_cal & mask_wht], x='points', y='price', \
-sns.lmplot(data=df[mask_cal & mask_wht], x='price', y='points', \
-           hue = 'variety', \
-           x_estimator=np.mean,
-           legend = False,
-           fit_reg = False,
-           logx=False
-           )
-ax = plt.gca()
-ax.legend(loc='upper left')
-ax.set_xlabel('Price ($)')
-ax.set_ylabel('Score')
-ax.set_ylim(ymin=80, ymax=100)
-plt.tight_layout()
-plt.savefig('linear_regression_score_v_price_whites.png')
-plt.show()
+#sns.lmplot(data=df[mask_cal & mask_wht], x='price', y='points', \
+#           hue = 'variety', \
+#           x_estimator=np.mean,
+#           legend = False,
+#           fit_reg = False,
+#           logx=False
+#           )
+#ax = plt.gca()
+#ax.legend(loc='upper left', fontsize=15)
+#ax.set_xlabel('Price ($)', fontsize=20)
+#ax.set_ylabel('Score', fontsize=20)
+#ax.set_ylim(ymin=80, ymax=100)
+#plt.tight_layout()
+#plt.savefig('linear_regression_score_v_price_whites.png')
+#plt.show()
 
-sns.residplot(data=df[mask_cal & mask_chd], x='points', y='price')
-sns.residplot(data=df[mask_cal & mask_sav], x='points', y='price')
-sns.residplot(data=df[mask_cal & mask_rsl], x='points', y='price')
-ax = plt.gca()
-ax.legend(loc='upper left')
-ax.set_ylabel('Price Residual')
-ax.set_xlabel('Score')
-plt.show()
+#sns.residplot(data=df[mask_cal & mask_chd], x='points', y='price')
+#sns.residplot(data=df[mask_cal & mask_sav], x='points', y='price')
+#sns.residplot(data=df[mask_cal & mask_rsl], x='points', y='price')
+#ax = plt.gca()
+#ax.legend(loc='upper left', fontsize=15)
+#ax.set_ylabel('Price Residual', fontsize=20)
+#ax.set_xlabel('Score', fontsize=20)
+#plt.show()
 
 
 fig, ax = plt.subplots()
-sns.kdeplot(df[mask_cal & mask_pin]['price'], label = 'Pinot Noir')
-sns.kdeplot(df[mask_cal & mask_mer]['price'], label = 'Merlot')
-ax.legend(loc='best')
+sns.kdeplot(df[mask_cal & mask_pin]['price'], label = 'pinot noir')
+sns.kdeplot(df[mask_cal & mask_mer]['price'], label = 'merlot')
+ax.legend(loc='best', fontsize=15)
 ax.set_xlim(xmin=0, xmax=100)
-ax.set_ylabel('Frequency')
-ax.set_xlabel('US Price ($)')
+ax.set_ylabel('Frequency', fontsize=20)
+ax.set_xlabel('US Price ($)', fontsize=20)
+ax.tick_params(labelsize='large')
+plt.tight_layout()
 plt.savefig('price_kde_pinot_merlot.png')
 plt.show()
 
 fig, ax = plt.subplots()
-sns.kdeplot(df[mask_cal & mask_pin]['points'], label = 'Pinot Noir')
-sns.kdeplot(df[mask_cal & mask_mer]['points'], label = 'Merlot')
-ax.legend(loc='best')
+sns.kdeplot(df[mask_cal & mask_pin]['points'], label = 'pinot noir')
+sns.kdeplot(df[mask_cal & mask_mer]['points'], label = 'merlot')
+ax.legend(loc='upper right', fontsize=15)
 ax.set_xlim(xmin=80, xmax=100)
-ax.set_ylabel('Frequency')
-ax.set_xlabel('Score')
+ax.set_ylabel('Frequency', fontsize=20)
+ax.set_xlabel('Score', fontsize=20)
+ax.tick_params(labelsize='large')
+plt.tight_layout()
 plt.savefig('score_kde_pinot_merlot.png')
 plt.show()
 
