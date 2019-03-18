@@ -49,6 +49,7 @@ df['color'] = df['variety'].apply(wine.coloring)
 #df = df[df['color'] == 'red']
 #df = df[df['color'] == 'white']
 
+#flags: set to switch models
 normalize_price = False
 linear_regression = True
 north_coast_pinot_only = False
@@ -93,7 +94,7 @@ if linear_regression:
     lr.fit(X_train, y) # reshape to column vector
     wine.plot_coefs(X_train, np.fabs(lr.coef_), \
                     'Coefficients in Simple Linear Regression Model')
-    plt.savefig('simple_regression_coefs.png')
+    #plt.savefig('simple_regression_coefs.png')
     
     y_pred = lr.predict(X_test)
     
@@ -118,7 +119,7 @@ if linear_regression:
     plt.xlabel('Difference of Real Score from Predicted')
     plt.ylabel('')
     plt.grid(True, alpha=0.3)
-    plt.savefig('linear_regression_accuracy_reds.png')
+    #plt.savefig('linear_regression_accuracy_reds.png')
     plt.tight_layout()
     plt.show()
     
@@ -170,7 +171,7 @@ if north_coast_pinot_only:
     ax.set_xlabel('Price ($)')
     ax.set_ylabel('Score')
     plt.legend()
-    plt.savefig('pinot_northcoast_score_v_price.png')
+    #plt.savefig('pinot_northcoast_score_v_price.png')
     plt.show()
  
 
@@ -204,7 +205,7 @@ if tree_regression:
     ax.set_ylabel('Mean Squared Error (score)')
     ax.set_xlabel('')
     ax.grid(alpha=0.3)
-    plt.savefig('random_forrest_regressor.png')
+    #plt.savefig('random_forrest_regressor.png')
     plt.show()
 
     #compute residuals?
@@ -225,7 +226,7 @@ if tree_classifier:
     
     wine.plot_coefs(X_train, clf.feature_importances_, \
                     'Feature Importances (Random Forest Classifier)')
-    plt.savefig('random_forest_feature_importance.png')
+    #plt.savefig('random_forest_feature_importance.png')
     
 #could plot price and score for generic wines. Expect them to be somewhat correlated
     

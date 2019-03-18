@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Initial data exploration of wine
+Exploratory data analysis for WineFlask
 
 @author: joshmagee
 Wed Sep 12 10:33:50 2018
@@ -15,7 +15,9 @@ import seaborn as sns
 
 sns.set_palette("dark")
 
-#now some specific plotting functions
+##############################################################################
+############# Function definitions ###########################################    
+##############################################################################
 def plot_empty_fields(df, title, ylabel, scale, file):
     index = [i for i,_ in enumerate(df.columns)]
     
